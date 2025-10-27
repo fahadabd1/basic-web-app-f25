@@ -15,20 +15,28 @@ export default function QueryProcessor(query: string): string {
     return "fahadabd";
   }
 
+  // Handle "largest number" queries
   if (query.toLowerCase().includes("largest")) {
-    return `84`;
+    // Extract all numbers from the query
+    const numbers = query.match(/\d+/g);
+    if (numbers && numbers.length > 0) {
+      const numericValues = numbers.map(n => parseInt(n, 10));
+      const largest = Math.max(...numericValues);
+      return largest.toString();
+    }
   }
 
-  if (query.toLowerCase().includes("86 plus 32")) {
-    return `118`;
+  // Handle "plus" addition queries
+  if (query.toLowerCase().includes("plus")) {
+    // Extract all numbers from the query
+    const numbers = query.match(/\d+/g);
+    if (numbers && numbers.length >= 2) {
+      const num1 = parseInt(numbers[0], 10);
+      const num2 = parseInt(numbers[1], 10);
+      const sum = num1 + num2;
+      return sum.toString();
+    }
   }
-
-  if (query.toLowerCase().includes("98 plus 32")) {
-    return `130`;
-  }
-
-
-
 
   return "";
 }
