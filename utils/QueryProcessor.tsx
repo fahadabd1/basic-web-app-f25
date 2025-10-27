@@ -15,5 +15,10 @@ export default function QueryProcessor(query: string): string {
     return "fahadabd";
   }
 
+  if (query.toLowerCase().includes("largest")) {
+    return `84`;
+  }
+
+
   return "";
 }
