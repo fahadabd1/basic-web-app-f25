@@ -30,27 +30,35 @@ export default function QueryProcessor(query: string): string {
   const numbers = query.match(/\d+/g);
 
   if (numbers && numbers.length >= 2) {
-    const num1 = parseInt(numbers[0], 10);
-    const num2 = parseInt(numbers[1], 10);
+    const numericValues = numbers.map(n => parseInt(n, 10));
 
-    // Addition
+    // Addition - sum all numbers
     if (query.toLowerCase().includes("plus")) {
-      return (num1 + num2).toString();
+      const sum = numericValues.reduce((acc, num) => acc + num, 0);
+      return sum.toString();
     }
 
-    // Subtraction
+    // Subtraction - subtract all subsequent numbers from the first
     if (query.toLowerCase().includes("minus")) {
-      return (num1 - num2).toString();
+      const difference = numericValues.reduce((acc, num, index) =>
+        index === 0 ? num : acc - num, 0);
+      return difference.toString();
     }
 
-    // Multiplication
+    // Multiplication - multiply all numbers
     if (query.toLowerCase().includes("multiplied")) {
-      return (num1 * num2).toString();
+      const product = numericValues.reduce((acc, num) => acc * num, 1);
+      return product.toString();
     }
 
-    // Division
+    // Power/Exponent - only for two numbers
+    if (query.toLowerCase().includes("power")) {
+      return Math.pow(numericValues[0], numericValues[1]).toString();
+    }
+
+    // Division - only for two numbers
     if (query.toLowerCase().includes("divided")) {
-      return (num1 / num2).toString();
+      return (numericValues[0] / numericValues[1]).toString();
     }
   }
 
