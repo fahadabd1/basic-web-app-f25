@@ -31,34 +31,81 @@ export default function QueryProcessor(query: string): string {
 
   if (numbers && numbers.length >= 2) {
     const numericValues = numbers.map(n => parseInt(n, 10));
+    const lowerQuery = query.toLowerCase();
 
-    // Addition - sum all numbers
-    if (query.toLowerCase().includes("plus")) {
-      const sum = numericValues.reduce((acc, num) => acc + num, 0);
-      return sum.toString();
+    // Parse the expression into tokens (numbers and operators)
+    const words = lowerQuery.split(/\s+/);
+    const tokens: Array<{ type: 'number' | 'operator', value: number | string }> = [];
+    let numIndex = 0;
+
+    for (const word of words) {
+      if (word === "plus") {
+        tokens.push({ type: 'operator', value: '+' });
+      } else if (word === "minus") {
+        tokens.push({ type: 'operator', value: '-' });
+      } else if (word === "multiplied") {
+        tokens.push({ type: 'operator', value: '*' });
+      } else if (word === "divided") {
+        tokens.push({ type: 'operator', value: '/' });
+      } else if (word === "power") {
+        tokens.push({ type: 'operator', value: '^' });
+      } else if (word.match(/\d+/) && numIndex < numericValues.length) {
+        tokens.push({ type: 'number', value: numericValues[numIndex] });
+        numIndex++;
+      }
     }
 
-    // Subtraction - subtract all subsequent numbers from the first
-    if (query.toLowerCase().includes("minus")) {
-      const difference = numericValues.reduce((acc, num, index) =>
-        index === 0 ? num : acc - num, 0);
-      return difference.toString();
-    }
+    // If we have valid tokens, evaluate with order of operations
+    if (tokens.length > 0 && tokens[0].type === 'number') {
+      // First pass: handle power operations (highest precedence)
+      let i = 0;
+      while (i < tokens.length) {
+        if (i > 0 && i < tokens.length - 1 &&
+            tokens[i].type === 'operator' && tokens[i].value === '^') {
+          const left = tokens[i - 1].value as number;
+          const right = tokens[i + 1].value as number;
+          const result = Math.pow(left, right);
+          tokens.splice(i - 1, 3, { type: 'number', value: result });
+          i = 0; // Restart from beginning
+        } else {
+          i++;
+        }
+      }
 
-    // Multiplication - multiply all numbers
-    if (query.toLowerCase().includes("multiplied")) {
-      const product = numericValues.reduce((acc, num) => acc * num, 1);
-      return product.toString();
-    }
+      // Second pass: handle multiplication and division (left to right)
+      i = 0;
+      while (i < tokens.length) {
+        if (i > 0 && i < tokens.length - 1 &&
+            tokens[i].type === 'operator' && (tokens[i].value === '*' || tokens[i].value === '/')) {
+          const left = tokens[i - 1].value as number;
+          const right = tokens[i + 1].value as number;
+          const result = tokens[i].value === '*' ? left * right : left / right;
+          tokens.splice(i - 1, 3, { type: 'number', value: result });
+          i = 0; // Restart from beginning
+        } else {
+          i++;
+        }
+      }
 
-    // Power/Exponent - only for two numbers
-    if (query.toLowerCase().includes("power")) {
-      return Math.pow(numericValues[0], numericValues[1]).toString();
-    }
+      // Third pass: handle addition and subtraction (left to right)
+      i = 0;
+      while (i < tokens.length) {
+        if (i > 0 && i < tokens.length - 1 &&
+            tokens[i].type === 'operator' && (tokens[i].value === '+' || tokens[i].value === '-')) {
+          const left = tokens[i - 1].value as number;
+          const right = tokens[i + 1].value as number;
+          const result = tokens[i].value === '+' ? left + right : left - right;
+          tokens.splice(i - 1, 3, { type: 'number', value: result });
+          i = 0; // Restart from beginning
+        } else {
+          i++;
+        }
+      }
 
-    // Division - only for two numbers
-    if (query.toLowerCase().includes("divided")) {
-      return (numericValues[0] / numericValues[1]).toString();
+      // Return the final result
+      if (tokens.length === 1 && tokens[0].type === 'number') {
+        return tokens[0].value.toString();
+      }
     }
   }
 
@@ -108,6 +155,40 @@ export default function QueryProcessor(query: string): string {
       if (primes.length > 0) {
         // Return comma-separated list of primes
         return primes.join(", ");
+      }
+    }
+  }
+
+  // Handle "anagram" queries
+  if (query.toLowerCase().includes("anagram")) {
+    // Helper function to normalize a word for anagram comparison
+    const normalize = (word: string): string => {
+      return word.toLowerCase().split('').sort().join('');
+    };
+
+    // Extract the target word (word after "anagram of")
+    const anagramOfMatch = query.match(/anagram of (\w+)/i);
+    if (anagramOfMatch) {
+      const targetWord = anagramOfMatch[1];
+      const targetNormalized = normalize(targetWord);
+
+      // Extract all words from the query (after the colon)
+      const colonIndex = query.indexOf(':');
+      if (colonIndex !== -1) {
+        const wordList = query.substring(colonIndex + 1);
+        const words = wordList.match(/\w+/g);
+
+        if (words) {
+          // Find all anagrams
+          const anagrams = words.filter(word => {
+            return word.toLowerCase() !== targetWord.toLowerCase() &&
+                   normalize(word) === targetNormalized;
+          });
+
+          if (anagrams.length > 0) {
+            return anagrams.join(", ");
+          }
+        }
       }
     }
   }
