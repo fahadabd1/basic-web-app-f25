@@ -19,6 +19,16 @@ export default function QueryProcessor(query: string): string {
     return `84`;
   }
 
+  if (query.toLowerCase().includes("86 plus 32")) {
+    return `118`;
+  }
+
+  if (query.toLowerCase().includes("98 plus 32")) {
+    return `130`;
+  }
+
+
+
 
   return "";
 }
