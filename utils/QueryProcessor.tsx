@@ -50,5 +50,23 @@ export default function QueryProcessor(query: string): string {
     }
   }
 
+  // Handle "both a square and a cube" queries
+  if (query.toLowerCase().includes("square") && query.toLowerCase().includes("cube")) {
+    // Extract all numbers from the query
+    const numbers = query.match(/\d+/g);
+    if (numbers && numbers.length > 0) {
+      const numericValues = numbers.map(n => parseInt(n, 10));
+
+      // A number is both a perfect square and perfect cube if it's a 6th power
+      // Check each number
+      for (const num of numericValues) {
+        const sixthRoot = Math.round(Math.pow(num, 1/6));
+        if (Math.pow(sixthRoot, 6) === num) {
+          return num.toString();
+        }
+      }
+    }
+  }
+
   return "";
 }
