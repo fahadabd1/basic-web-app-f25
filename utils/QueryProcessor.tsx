@@ -26,27 +26,31 @@ export default function QueryProcessor(query: string): string {
     }
   }
 
-  // Handle "plus" addition queries
-  if (query.toLowerCase().includes("plus")) {
-    // Extract all numbers from the query
-    const numbers = query.match(/\d+/g);
-    if (numbers && numbers.length >= 2) {
-      const num1 = parseInt(numbers[0], 10);
-      const num2 = parseInt(numbers[1], 10);
-      const sum = num1 + num2;
-      return sum.toString();
-    }
-  }
+  // Handle arithmetic operations
+  const numbers = query.match(/\d+/g);
 
-  // Handle "multiplied by" multiplication queries
-  if (query.toLowerCase().includes("multiplied")) {
-    // Extract all numbers from the query
-    const numbers = query.match(/\d+/g);
-    if (numbers && numbers.length >= 2) {
-      const num1 = parseInt(numbers[0], 10);
-      const num2 = parseInt(numbers[1], 10);
-      const product = num1 * num2;
-      return product.toString();
+  if (numbers && numbers.length >= 2) {
+    const num1 = parseInt(numbers[0], 10);
+    const num2 = parseInt(numbers[1], 10);
+
+    // Addition
+    if (query.toLowerCase().includes("plus")) {
+      return (num1 + num2).toString();
+    }
+
+    // Subtraction
+    if (query.toLowerCase().includes("minus")) {
+      return (num1 - num2).toString();
+    }
+
+    // Multiplication
+    if (query.toLowerCase().includes("multiplied")) {
+      return (num1 * num2).toString();
+    }
+
+    // Division
+    if (query.toLowerCase().includes("divided")) {
+      return (num1 / num2).toString();
     }
   }
 
@@ -57,14 +61,12 @@ export default function QueryProcessor(query: string): string {
     if (numbers && numbers.length > 0) {
       const numericValues = numbers.map(n => parseInt(n, 10));
 
-      // A number is both a perfect square and perfect cube if it's a 6th power
-      // Check each number
+
       for (const num of numericValues) {
-        // Check if it's a perfect square
         const squareRoot = Math.sqrt(num);
         const isSquare = Number.isInteger(squareRoot);
 
-        // Check if it's a perfect cube
+        
         const cubeRoot = Math.round(Math.pow(num, 1/3));
         const isCube = Math.pow(cubeRoot, 3) === num;
 
