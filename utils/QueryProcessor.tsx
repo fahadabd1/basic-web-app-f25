@@ -60,8 +60,15 @@ export default function QueryProcessor(query: string): string {
       // A number is both a perfect square and perfect cube if it's a 6th power
       // Check each number
       for (const num of numericValues) {
-        const sixthRoot = Math.round(Math.pow(num, 1/6));
-        if (Math.pow(sixthRoot, 6) === num) {
+        // Check if it's a perfect square
+        const squareRoot = Math.sqrt(num);
+        const isSquare = Number.isInteger(squareRoot);
+
+        // Check if it's a perfect cube
+        const cubeRoot = Math.round(Math.pow(num, 1/3));
+        const isCube = Math.pow(cubeRoot, 3) === num;
+
+        if (isSquare && isCube) {
           return num.toString();
         }
       }
